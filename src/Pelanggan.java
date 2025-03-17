@@ -1,15 +1,44 @@
+import java.sql.DatabaseMetaData;
+import java.util.ArrayList;
+
+class DataBase {
+    private ArrayList<Pelanggan> dataPelanggan = new ArrayList<Pelanggan>();
+
+    public void tambahPelanggan(Pelanggan p) {
+        dataPelanggan.add(p);
+    }
+    public String getNomorPelanggan(String nomorPelanggan) {
+        for (Pelanggan p : dataPelanggan) {
+            if (p.getNomorPelanggan().equals(nomorPelanggan)) {
+                return p.getNomorPelanggan();
+            }
+        }
+        return null;
+    }
+    public boolean cekNomorPelanggan(String nomorPelanggan) {
+        for (Pelanggan p : dataPelanggan) {
+            if (p.getNomorPelanggan().equals(nomorPelanggan)) {
+                return true;
+            }
+        }
+        return false;
+    }
+}
+
 public class Pelanggan {
+
     // ++ DEKLARASI VARIABEL DENGAN ENKAPSULASI ++ \\
+    private DataBase db = new DataBase(); 
     private String nomorPelanggan;
     private String nama;
     private double saldo;
     private int pin;
     private int jenisRekening;
     static int jumlahPelanggan = 0;
-
     private int kesalahanAutentifikasi;
-    // ++ CONSTRUKTOR ++ \\
-    public Pelanggan(String nomorPelanggan, String nama, double saldo, int pin) {
+
+    // ++ KONSTRUKTOR ++ \\
+    public Pelanggan(String nomorPelanggan, String nama, double saldo, int pin, int jenisRekening) {
         jumlahPelanggan++;
         this.nomorPelanggan = nomorPelanggan;
         this.nama = nama;
@@ -120,5 +149,12 @@ public class Pelanggan {
         }
         saldo += jumlahTopUp;
         System.out.println("Top up berhasil. Saldo Anda sekarang: " + saldo);
+    }
+
+    // ++ FUNGSI CEK NOMOR PELANGGAN ++ \\
+    void cekNomorPelanggan(String nomorPelanggan) {
+        if (db.cekNomorPelanggan(nomorPelanggan)) {
+
+        }
     }
 }
