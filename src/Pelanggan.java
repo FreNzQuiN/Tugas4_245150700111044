@@ -156,13 +156,13 @@ public class Pelanggan {
         }
         double cashback = hitungCashback(totalPembelian);
         double totalBiaya = totalPembelian - cashback;
-        if (saldo >= totalBiaya) {
+        if (saldo >= totalBiaya && (saldo - totalBiaya) >= 10000) {
             saldo -= totalBiaya;
             saldo += cashback;
             System.out.println("Transaksi berhasil. Saldo Anda sekarang: " + rupiah.format(saldo));
             return true;
         } else {
-            System.out.println("Saldo tidak cukup.");
+            System.out.println("Saldo tidak cukup atau saldo pasca transaksi kurang dari Rp10.000.");
             return false;
         }
     }
@@ -178,7 +178,7 @@ public class Pelanggan {
             return;
         }
         saldo += jumlahTopUp;
-        System.out.printf("Top up berhasil. Saldo Anda sekarang: %s", rupiah.format(saldo));
+        System.out.println("Top up berhasil. Saldo Anda sekarang: " + rupiah.format(saldo));
     }
 
     // ++ FUNGSI CEK NOMOR PELANGGAN ++ \\

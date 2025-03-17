@@ -103,20 +103,9 @@ public class Main {
                     System.out.println("==================================================================");
                     System.out.println("0. Kembali");
                     System.out.println("---------------------------------------------");
-                    boolean adaRekening = false;
-                    Pelanggan pelanggan = null;
-                    while(!adaRekening){
-                        System.out.print("Masukkan nomor rekening: ");
-                        String nomorRekening = scan.nextLine();
-                        if (nomorRekening.equals("0")) {
-                            return;
-                        }
-                        pelanggan = getPelangganByNomorRekening(nomorRekening);
-                        if (pelanggan == null) {
-                            System.out.println("Nomor rekening tidak ditemukan.");
-                        } else {
-                            adaRekening = true;
-                        }
+                    Pelanggan pelanggan = cekRekening();
+                    if (pelanggan == null) {
+                        break;
                     }
                     pelanggan.tampilkanInformasi();
                     try {
@@ -125,6 +114,7 @@ public class Main {
                         System.err.println("Thread interrupted: " + e.getMessage());
                     }
                     System.out.println("==================================================================");
+                    System.out.println("Keluar dalam 5 detik...");
                     break;
                 case 4:
                     System.out.println("==================================================================");
@@ -210,13 +200,16 @@ public class Main {
         scan.nextLine();
 
         int idUnik = Pelanggan.getJumlahPelanggan();
-        String nomorRekening = String.format("%08d", idUnik); // Memformat idUnik menjadi 6 digit dengan leading zeros
+        String nomorRekening = String.format("%08d", idUnik); // Memformat idUnik menjadi 8 digit dengan leading zeros
         nomorRekening = String.valueOf(jenisRekening) + nomorRekening; // Menambahkan jenis rekening di depan
         System.out.println("\nNomor Rekening Anda: " + nomorRekening + " berhasil dibuat!");
         
         Pelanggan pelangganBaru = new Pelanggan(nama, pin, nomorRekening, jenisRekening);
         pelangganBaru.tambahKeDatabase();
-
+        
+        System.out.println("Rekening berhasil dibuat. Silakan lakukan top up untuk mengisi saldo.");
+        System.out.println("==================================================================");
+        System.out.println("Keluar dalam 5 detik...");
         try {
             Thread.sleep(5000);
         } catch (InterruptedException e) {
@@ -225,34 +218,25 @@ public class Main {
     }
 
     static void transaksi() {
-        boolean adaRekening = false;
-        Pelanggan pelanggan = null;
-        while(!adaRekening){
-            System.out.print("Masukkan nomor rekening: ");
-            String nomorRekening = scan.nextLine();
-            if (nomorRekening.equals("0")) {
-                return;
-            }
-            pelanggan = getPelangganByNomorRekening(nomorRekening);
-            if (pelanggan == null) {
-                System.out.println("Nomor rekening tidak ditemukan.");
-            } else {
-                adaRekening = true;
-            }
+        Pelanggan pelanggan = cekRekening();
+        if (pelanggan == null) {
+            return;
         }
-    
+
         System.out.print("Masukkan total pembelian: ");
         double totalPembelian = scan.nextDouble();
         System.out.print("Masukkan PIN: ");
         int pin = scan.nextInt();
         scan.nextLine();
-    
+
         if (pelanggan.transaksiPembelian(totalPembelian, pin)) {
             System.out.println("Transaksi berhasil.");
         } else {
             System.out.println("Transaksi gagal.");
         }
 
+        System.out.println("==================================================================");
+        System.out.println("Keluar dalam 5 detik...");
         try {
             Thread.sleep(5000);
         } catch (InterruptedException e) {
@@ -261,20 +245,9 @@ public class Main {
     }
 
     static void topUp() {
-        boolean adaRekening = false;
-        Pelanggan pelanggan = null;
-        while(!adaRekening){
-            System.out.print("Masukkan nomor rekening: ");
-            String nomorRekening = scan.nextLine();
-            if (nomorRekening.equals("0")) {
-                return;
-            }
-            pelanggan = getPelangganByNomorRekening(nomorRekening);
-            if (pelanggan == null) {
-                System.out.println("Nomor rekening tidak ditemukan.");
-            } else {
-                adaRekening = true;
-            }
+        Pelanggan pelanggan = cekRekening();
+        if (pelanggan == null) {
+            return;
         }
 
         System.out.print("Masukkan jumlah top up: ");
@@ -285,11 +258,36 @@ public class Main {
 
         pelanggan.topUp(jumlahTopUp, pin);
 
+        System.out.println("==================================================================");
+        System.out.println("Keluar dalam 5 detik...");
         try {
             Thread.sleep(5000);
         } catch (InterruptedException e) {
             System.err.println("Thread interrupted: " + e.getMessage());
         }
+    }
+
+    static Pelanggan cekRekening() {
+        boolean adaRekening = false;
+        Pelanggan pelanggan = null;
+        while (!adaRekening) {
+            System.out.print("Masukkan nomor rekening: ");
+            String nomorRekening = scan.nextLine();
+            if (nomorRekening.equals("0")) {
+                return null;
+            }
+            if (!nomorRekening.matches("\\d+")) {
+                System.out.println("Nomor rekening harus berupa angka.");
+                continue;
+            }
+            pelanggan = getPelangganByNomorRekening(nomorRekening);
+            if (pelanggan == null) {
+                System.out.println("Nomor rekening tidak ditemukan.");
+            } else {
+                adaRekening = true;
+            }
+        }
+        return pelanggan;
     }
 
     static Pelanggan getPelangganByNomorRekening(String nomorRekening) {
