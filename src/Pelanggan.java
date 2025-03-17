@@ -1,23 +1,39 @@
-import java.sql.DatabaseMetaData;
 import java.util.ArrayList;
+import java.text.NumberFormat;
+import java.util.Locale;
 
 class DataBase {
+    private static DataBase instance;
     private ArrayList<Pelanggan> dataPelanggan = new ArrayList<Pelanggan>();
+
+    private DataBase() {}
+
+    public static DataBase getInstance() {
+        if (instance == null) {
+            instance = new DataBase();
+        }
+        return instance;
+    }
 
     public void tambahPelanggan(Pelanggan p) {
         dataPelanggan.add(p);
     }
+    public ArrayList<Pelanggan> getDataPelanggan () {
+        return dataPelanggan;
+    }
+
     public String getNomorPelanggan(String nomorPelanggan) {
         for (Pelanggan p : dataPelanggan) {
-            if (p.getNomorPelanggan().equals(nomorPelanggan)) {
-                return p.getNomorPelanggan();
+            if (p.getNomorRekening().equals(nomorPelanggan)) {
+                return p.getNomorRekening();
             }
         }
         return null;
     }
+
     public boolean cekNomorPelanggan(String nomorPelanggan) {
         for (Pelanggan p : dataPelanggan) {
-            if (p.getNomorPelanggan().equals(nomorPelanggan)) {
+            if (p.getNomorRekening().equals(nomorPelanggan)) {
                 return true;
             }
         }
@@ -28,51 +44,65 @@ class DataBase {
 public class Pelanggan {
 
     // ++ DEKLARASI VARIABEL DENGAN ENKAPSULASI ++ \\
-    private DataBase db = new DataBase(); 
-    private String nomorPelanggan;
+    private DataBase db = DataBase.getInstance(); 
+    private String nomorRekening;
     private String nama;
     private double saldo;
     private int pin;
     private int jenisRekening;
     static int jumlahPelanggan = 0;
     private int kesalahanAutentifikasi;
+    NumberFormat rupiah = NumberFormat.getCurrencyInstance(new Locale("id", "ID"));
 
     // ++ KONSTRUKTOR ++ \\
-    public Pelanggan(String nomorPelanggan, String nama, double saldo, int pin, int jenisRekening) {
+    public Pelanggan(String nama, int pin, String nomorRekening, int jenisRekening) {
         jumlahPelanggan++;
-        this.nomorPelanggan = nomorPelanggan;
+        this.nomorRekening = nomorRekening;
         this.nama = nama;
-        this.saldo = saldo;
+        this.saldo = 0;
         this.pin = pin;
-        this.jenisRekening = Integer.parseInt(nomorPelanggan.substring(0, 2));
+        this.jenisRekening = jenisRekening;
         this.kesalahanAutentifikasi = 0;
     }
 
-    // ++ ACCESSOR ATAU GETTER ++ \\
-    public String getNomorPelanggan() {
-        return nomorPelanggan;
+    public void tambahKeDatabase() {
+        db.tambahPelanggan(this);
     }
+
+    // ++ ACCESSOR ATAU GETTER ++ \\
+    public String getNomorRekening() {
+        return nomorRekening;
+    }
+
     public String getNama() {
         return nama;
     }
+
     public double getSaldo() {
         return saldo;
     }
+
     public int getPin() {
         return pin;
     }
+
     public int getJenisRekening() {
         return jenisRekening;
     }
+
     public int getKesalahanAutentifikasi() {
         return kesalahanAutentifikasi;
+    }
+
+    static int getJumlahPelanggan() {
+        return jumlahPelanggan;
     }
 
     // ++ MUTATOR ATAU SETTER ++ \\
     public void setKesalahanAutentifikasi(int kesalahanAutentifikasi) {
         this.kesalahanAutentifikasi = kesalahanAutentifikasi;
     }
-    
+
     // ++ SUBFUNGSI AUTENTIKASI ++ \\
     public boolean autentikasi(int inputPin) {
         if (inputPin == pin) {
@@ -83,7 +113,7 @@ public class Pelanggan {
             return false;
         }
     }
-    
+
     // ++ SUBFUNGSI PENGECEKAN AKUN ++ \\
     public boolean isAkunDiblokir() {
         return kesalahanAutentifikasi >= 3;
@@ -113,7 +143,7 @@ public class Pelanggan {
             }
         }
     }
-    
+
     // ++ FUNGSI LAKUKAN TRANSAKSI ++ \\
     public boolean transaksiPembelian(double totalPembelian, int inputPin) {
         if (isAkunDiblokir()) {
@@ -126,17 +156,17 @@ public class Pelanggan {
         }
         double cashback = hitungCashback(totalPembelian);
         double totalBiaya = totalPembelian - cashback;
-        if (saldo - totalBiaya >= 10000) {
+        if (saldo >= totalBiaya) {
             saldo -= totalBiaya;
             saldo += cashback;
-            System.out.println("Transaksi berhasil. Saldo Anda sekarang: " + saldo);
+            System.out.println("Transaksi berhasil. Saldo Anda sekarang: " + rupiah.format(saldo));
             return true;
         } else {
             System.out.println("Saldo tidak cukup.");
             return false;
         }
     }
-    
+
     // ++ FUNGSI PENAMBAHAN SALDO ++ \\
     public void topUp(double jumlahTopUp, int inputPin) {
         if (isAkunDiblokir()) {
@@ -148,13 +178,23 @@ public class Pelanggan {
             return;
         }
         saldo += jumlahTopUp;
-        System.out.println("Top up berhasil. Saldo Anda sekarang: " + saldo);
+        System.out.printf("Top up berhasil. Saldo Anda sekarang: %s", rupiah.format(saldo));
     }
 
     // ++ FUNGSI CEK NOMOR PELANGGAN ++ \\
     void cekNomorPelanggan(String nomorPelanggan) {
         if (db.cekNomorPelanggan(nomorPelanggan)) {
-
+            System.out.println("Nomor pelanggan ditemukan: " + nomorPelanggan);
+        } else {
+            System.out.println("Nomor pelanggan tidak ditemukan.");
         }
+    }
+
+    // ++ FUNGSI TAMPILKAN INFORMASI PELANGGAN ++ \\
+    public void tampilkanInformasi() {
+        System.out.println("Nama: " + nama);
+        System.out.println("Nomor Rekening: " + nomorRekening);
+        System.out.println("Saldo: " + saldo);
+        System.out.println("Jenis Rekening: " + jenisRekening);
     }
 }

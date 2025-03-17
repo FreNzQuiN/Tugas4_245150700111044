@@ -21,8 +21,10 @@ class ClearScreen {
 }
 
 public class Main {
+    private static Scanner scan = new Scanner(System.in);
+    private static DataBase db = DataBase.getInstance();
+
     public static void main(String[] args) {
-        Scanner scan = new Scanner(System.in);
         while (true) {
             System.out.println("===================================================================");
             System.out.println("                  SELAMAT DATANG DI APLIKASI BANK.");
@@ -31,17 +33,114 @@ public class Main {
             System.out.println("___________________________________________________________________");
             System.out.println("1. Pembukaan Rekening");
             System.out.println("2. Transaksi");
+            System.out.println("3. Informasi Pelanggan");
+            System.out.println("4. Informasi Aplikasi");
             System.out.println("0. Keluar");
             System.out.println("---------------------------------------------");
             System.out.print("Pilihan: ");
             int pilihan = scan.nextInt();
             ClearScreen.clear();
+            scan.nextLine();
             switch (pilihan) {
                 case 1:
-                    pembukaanRekening();
+                    try {
+                        pembukaanRekening();
+                    } catch (InterruptedException e) {
+                        System.err.println("Thread interrupted: " + e.getMessage());
+                    }
                     break;
                 case 2:
-                    transaksi();
+                    int pilihanTransaksi = 0;
+                    boolean transaksiValid = false;
+                    System.out.println("---------------------------------------------");
+                    System.out.println("1. Pembelian");
+                    System.out.println("2. Top Up");
+                    System.out.println("0. Kembali");
+                    System.out.println("---------------------------------------------");
+                    while(!transaksiValid){
+                        System.out.print("Pilihan: ");
+                        if (scan.hasNextInt()) {
+                            pilihanTransaksi = scan.nextInt();
+                            if(pilihanTransaksi == 1 || pilihanTransaksi == 2 || pilihanTransaksi == 0){
+                                transaksiValid = true;
+                            } else {
+                                System.out.println("Input tidak valid. Silakan coba lagi.");
+                            }
+                        } else {
+                            System.out.println("Input harus berupa angka. Silakan coba lagi.");
+                            scan.next(); // Membersihkan input yang tidak valid
+                        }
+                    }
+                    scan.nextLine();
+                    ClearScreen.clear();
+                    switch (pilihanTransaksi) {
+                        case 1:
+                            System.out.println("==================================================================");
+                            System.out.println("                      MENU TRANSAKSI");
+                            System.out.println("==================================================================");
+                            System.out.println("0. Kembali");
+                            System.out.println("---------------------------------------------");
+                            transaksi();
+                            break;
+                        case 2:
+                            System.out.println("==================================================================");
+                            System.out.println("                      MENU TOP UP");
+                            System.out.println("==================================================================");
+                            System.out.println("0. Kembali");
+                            System.out.println("---------------------------------------------");
+                            topUp();
+                            break;
+                        case 0:
+                            break;
+                        default:
+                            System.out.println("Input tidak valid. Silakan coba lagi.");
+                            break;
+                    }
+                    break;
+                case 3:
+                    System.out.println("==================================================================");
+                    System.out.println("                      INFORMASI PELANGGAN");
+                    System.out.println("==================================================================");
+                    System.out.println("0. Kembali");
+                    System.out.println("---------------------------------------------");
+                    boolean adaRekening = false;
+                    Pelanggan pelanggan = null;
+                    while(!adaRekening){
+                        System.out.print("Masukkan nomor rekening: ");
+                        String nomorRekening = scan.nextLine();
+                        if (nomorRekening.equals("0")) {
+                            return;
+                        }
+                        pelanggan = getPelangganByNomorRekening(nomorRekening);
+                        if (pelanggan == null) {
+                            System.out.println("Nomor rekening tidak ditemukan.");
+                        } else {
+                            adaRekening = true;
+                        }
+                    }
+                    pelanggan.tampilkanInformasi();
+                    try {
+                        Thread.sleep(5000);
+                    } catch (InterruptedException e) {
+                        System.err.println("Thread interrupted: " + e.getMessage());
+                    }
+                    System.out.println("==================================================================");
+                    break;
+                case 4:
+                    System.out.println("==================================================================");
+                    System.out.println("                      INFORMASI APLIKASI");
+                    System.out.println("==================================================================");
+                    System.out.println("Aplikasi ini adalah aplikasi bank sederhana yang memungkinkan pengguna");
+                    System.out.println("untuk membuka rekening, melakukan transaksi pembelian, dan melakukan top up.");
+                    System.out.println("Aplikasi ini memiliki 3 jenis rekening: Silver, Gold, dan Platinum.");
+                    System.out.println("Setiap jenis rekening memiliki cashback yang berbeda.");
+                    System.out.println("Silakan pilih menu yang tersedia untuk melanjutkan.");
+                    System.out.println("==================================================================");
+                    try {
+                        Thread.sleep(5000);
+                    } catch (InterruptedException e) {
+                        System.err.println("Thread interrupted: " + e.getMessage());
+                    }
                     break;
                 case 0:
                     System.out.println("==================================================================");
@@ -56,8 +155,7 @@ public class Main {
         }
     }
 
-    static void pembukaanRekening() {
-        Scanner scan = new Scanner(System.in);
+    static void pembukaanRekening() throws InterruptedException {
         String nama = "";
         int pin = 0;
         int jenisRekening = 0;
@@ -72,7 +170,7 @@ public class Main {
         while (!namaValid) {
             System.out.print("Masukkan Nama: ");
             nama = scan.nextLine();
-            if (nama.matches("[a-zA-Z]+")) {
+            if (nama.matches("[a-zA-Z ]+")) {
                 namaValid = true;
             } else {
                 System.out.println("Nama hanya boleh berisi huruf. Mohon masukkan kembali.");
@@ -90,7 +188,7 @@ public class Main {
                 }
             } else {
                 System.out.println("Input harus berupa angka. Mohon masukkan kembali.");
-                scan.next(); // Mengabaikan input yang tidak valid
+                scan.next();
             }
         }
 
@@ -99,7 +197,7 @@ public class Main {
             System.out.print("\nMasukkan Jenis Rekening: ");
             if (scan.hasNextInt()) {
                 jenisRekening = scan.nextInt();
-                if (jenisRekening == 38 || jenisRekening == 56 || jenisRekening == 74) { // Memeriksa apakah input adalah pilihan yang valid
+                if (jenisRekening == 38 || jenisRekening == 56 || jenisRekening == 74) {
                     jenisRekeningValid = true;
                 } else {
                     System.out.println("Pilihan jenis rekening tidak valid. Mohon masukkan kembali.");
@@ -110,17 +208,96 @@ public class Main {
             }
         }
         scan.nextLine();
-        scan.close();
 
-        String nomorRekening = jenisRekening + String.valueOf(pin);
+        int idUnik = Pelanggan.getJumlahPelanggan();
+        String nomorRekening = String.format("%08d", idUnik); // Memformat idUnik menjadi 6 digit dengan leading zeros
+        nomorRekening = String.valueOf(jenisRekening) + nomorRekening; // Menambahkan jenis rekening di depan
         System.out.println("\nNomor Rekening Anda: " + nomorRekening + " berhasil dibuat!");
+        
+        Pelanggan pelangganBaru = new Pelanggan(nama, pin, nomorRekening, jenisRekening);
+        pelangganBaru.tambahKeDatabase();
+
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {
+            System.err.println("Thread interrupted: " + e.getMessage());
+        }
     }
 
-    static void transaksi(){
+    static void transaksi() {
+        boolean adaRekening = false;
+        Pelanggan pelanggan = null;
+        while(!adaRekening){
+            System.out.print("Masukkan nomor rekening: ");
+            String nomorRekening = scan.nextLine();
+            if (nomorRekening.equals("0")) {
+                return;
+            }
+            pelanggan = getPelangganByNomorRekening(nomorRekening);
+            if (pelanggan == null) {
+                System.out.println("Nomor rekening tidak ditemukan.");
+            } else {
+                adaRekening = true;
+            }
+        }
+    
+        System.out.print("Masukkan total pembelian: ");
+        double totalPembelian = scan.nextDouble();
+        System.out.print("Masukkan PIN: ");
+        int pin = scan.nextInt();
+        scan.nextLine();
+    
+        if (pelanggan.transaksiPembelian(totalPembelian, pin)) {
+            System.out.println("Transaksi berhasil.");
+        } else {
+            System.out.println("Transaksi gagal.");
+        }
 
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {
+            System.err.println("Thread interrupted: " + e.getMessage());
+        }
     }
 
-    static void topUp(){
+    static void topUp() {
+        boolean adaRekening = false;
+        Pelanggan pelanggan = null;
+        while(!adaRekening){
+            System.out.print("Masukkan nomor rekening: ");
+            String nomorRekening = scan.nextLine();
+            if (nomorRekening.equals("0")) {
+                return;
+            }
+            pelanggan = getPelangganByNomorRekening(nomorRekening);
+            if (pelanggan == null) {
+                System.out.println("Nomor rekening tidak ditemukan.");
+            } else {
+                adaRekening = true;
+            }
+        }
 
+        System.out.print("Masukkan jumlah top up: ");
+        double jumlahTopUp = scan.nextDouble();
+        System.out.print("Masukkan PIN: ");
+        int pin = scan.nextInt();
+        scan.nextLine();
+
+        pelanggan.topUp(jumlahTopUp, pin);
+
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {
+            System.err.println("Thread interrupted: " + e.getMessage());
+        }
+    }
+
+    static Pelanggan getPelangganByNomorRekening(String nomorRekening) {
+        for (Pelanggan p : db.getDataPelanggan()) {
+            if (p.getNomorRekening().equals(nomorRekening)) {
+                return p;
+            }
+        }
+        return null;
     }
 }
