@@ -76,7 +76,7 @@ public class Main {
                     switch (pilihanTransaksi) {
                         case 1:
                             System.out.println("==================================================================");
-                            System.out.println("                      MENU TRANSAKSI");
+                            System.out.println("                      MENU PEMBELIAN");
                             System.out.println("==================================================================");
                             System.out.println("0. Kembali");
                             System.out.println("---------------------------------------------");

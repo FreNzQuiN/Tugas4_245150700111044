@@ -6,9 +6,9 @@ class DataBase {
     private static DataBase instance;
     private ArrayList<Pelanggan> dataPelanggan = new ArrayList<Pelanggan>();
 
-    private DataBase() {}
+    private DataBase() {} // mencegah database diinstansiasi lebih dari satu kali
 
-    public static DataBase getInstance() {
+    public static DataBase getInstance() { // singleton pattern
         if (instance == null) {
             instance = new DataBase();
         }
@@ -50,7 +50,7 @@ public class Pelanggan {
     private double saldo;
     private int pin;
     private int jenisRekening;
-    static int jumlahPelanggan = 0;
+    private static int jumlahPelanggan = 0;
     private int kesalahanAutentifikasi;
     NumberFormat rupiah = NumberFormat.getCurrencyInstance(new Locale("id", "ID"));
 
@@ -94,7 +94,7 @@ public class Pelanggan {
         return kesalahanAutentifikasi;
     }
 
-    static int getJumlahPelanggan() {
+    public static int getJumlahPelanggan() {
         return jumlahPelanggan;
     }
 
@@ -158,7 +158,6 @@ public class Pelanggan {
         double totalBiaya = totalPembelian - cashback;
         if (saldo >= totalBiaya && (saldo - totalBiaya) >= 10000) {
             saldo -= totalBiaya;
-            saldo += cashback;
             System.out.println("Transaksi berhasil. Saldo Anda sekarang: " + rupiah.format(saldo));
             return true;
         } else {
@@ -182,7 +181,7 @@ public class Pelanggan {
     }
 
     // ++ FUNGSI CEK NOMOR PELANGGAN ++ \\
-    void cekNomorPelanggan(String nomorPelanggan) {
+    public void cekNomorPelanggan(String nomorPelanggan) {
         if (db.cekNomorPelanggan(nomorPelanggan)) {
             System.out.println("Nomor pelanggan ditemukan: " + nomorPelanggan);
         } else {
